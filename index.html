@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>วิศวกรรมอาหาร — จุดที่กระบวนการพบกับผลิตภัณฑ์</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&family=Noto+Serif+Thai:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root{
+  --ink:#101820;
+  --blueprint:#0E2F44;
+  --blueprint-deep:#0A2436;
+  --grid:#3F7CA6;
+  --paper:#EEEADD;
+  --paper-dim:#E4DFCE;
+  --hot:#D9773F;
+  --hot-soft:#F0B489;
+  --cold:#2F8F8B;
+  --cold-soft:#8FC9C6;
+  --steel:#B9C2C8;
+  --white:#FBF9F3;
+}
+*{margin:0; padding:0; box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:'Noto Serif Thai','Source Serif 4', serif;
+  background:var(--paper);
+  color:var(--ink);
+  overflow-x:hidden;
+}
+h1,h2,h3,.display{font-family:'Noto Sans Thai','Space Grotesk',sans-serif; letter-spacing:0;}
+.mono{font-family:'JetBrains Mono',monospace;}
+.wrap{max-width:1180px; margin:0 auto; padding:0 6vw;}
+section{position:relative;}
+
+/* ---------------- NAV ---------------- */
+.topnav{
+  position:fixed; top:0; left:0; right:0; z-index:50;
+  display:flex; justify-content:space-between; align-items:center;
+  padding:20px 6vw; mix-blend-mode:difference; color:#fff;
+  font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:.08em;
+}
+.topnav a{color:#fff; text-decoration:none; opacity:.75; transition:opacity .2s;}
+.topnav a:hover{opacity:1;}
+.topnav .links{display:flex; gap:22px;}
+@media (max-width:900px){.topnav .links{display:none;}}
+
+/* ---------------- HERO ---------------- */
+.hero{
+  min-height:100vh; background:var(--blueprint); color:var(--white);
+  position:relative; overflow:hidden;
+  display:flex; flex-direction:column; justify-content:flex-end;
+  padding-bottom:0;
+}
+.grid-bg{
+  position:absolute; inset:0; z-index:0; opacity:.35;
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size:44px 44px;
+  mask-image:radial-gradient(ellipse at 60% 30%, black 30%, transparent 75%);
+}
+.hero-content{position:relative; z-index:2; padding-top:16vh;}
+.eyebrow-tag{
+  display:inline-flex; align-items:center; gap:8px;
+  font-family:'JetBrains Mono',monospace; font-size:11.5px; letter-spacing:.14em;
+  color:var(--hot-soft); border:1px solid rgba(217,119,63,.4); border-radius:100px;
+  padding:6px 14px; margin-bottom:26px;
+}
+.eyebrow-tag .dot{width:6px; height:6px; border-radius:50%; background:var(--hot); animation:pulse 1.8s infinite;}
+@keyframes pulse{0%,100%{opacity:1;} 50%{opacity:.3;}}
+.hero h1{
+  font-size:clamp(38px,7vw,86px); font-weight:700; line-height:1.08;
+  max-width:900px;
+}
+.hero h1 em{font-style:normal; color:transparent; -webkit-text-stroke:1.5px var(--white);}
+.hero .lede{
+  font-family:'Noto Serif Thai',serif; font-size:clamp(15px,1.6vw,19px);
+  max-width:540px; margin-top:26px; color:rgba(251,249,243,.78); line-height:1.9;
+}
+
+/* pipeline */
+.pipeline-zone{position:relative; z-index:2; margin-top:60px; padding-bottom:64px;}
+.pipeline-zone svg{width:100%; height:auto; display:block;}
+.stage-label{font-family:'Noto Sans Thai',sans-serif; font-size:11px; fill:var(--white); opacity:.85;}
+.stage-spec{font-family:'JetBrains Mono',monospace; font-size:9.5px; fill:var(--hot-soft);}
+.pipe-path{fill:none; stroke:rgba(255,255,255,.25); stroke-width:2;}
+.flow-dot{fill:var(--hot);}
+.stage-node{fill:var(--blueprint-deep); stroke:var(--grid); stroke-width:1.5;}
+
+/* ---------------- INTRO / VENN ---------------- */
+.venn-section{background:var(--paper); padding:130px 0 100px;}
+.section-head{max-width:660px; margin-bottom:64px;}
+.section-tag{font-family:'JetBrains Mono',monospace; font-size:11.5px; letter-spacing:.14em; color:var(--hot); margin-bottom:16px;}
+.section-head h2{font-size:clamp(26px,4vw,42px); line-height:1.3; font-weight:600;}
+.section-head p{margin-top:18px; font-size:16px; color:#3a352c; line-height:1.9; max-width:620px;}
+
+.venn-wrap{display:grid; grid-template-columns:1fr 1fr; gap:60px; align-items:center;}
+.venn-svg-holder{position:relative;}
+.venn-list{display:flex; flex-direction:column; gap:22px;}
+.venn-item{
+  border-left:3px solid var(--steel); padding:6px 0 6px 20px; cursor:default;
+  transition:border-color .25s ease;
+}
+.venn-item:hover, .venn-item.active{border-color:var(--hot);}
+.venn-item h4{font-size:16px; margin-bottom:6px; font-weight:600;}
+.venn-item p{font-size:13.5px; color:#4a453c; line-height:1.8;}
+
+/* ---------------- UNIT OPS GRID ---------------- */
+.ops-section{background:var(--blueprint); color:var(--white); padding:120px 0;}
+.ops-section .section-tag{color:var(--cold-soft);}
+.ops-section .section-head p{color:rgba(251,249,243,.72);}
+.ops-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:2px; background:rgba(255,255,255,.12); margin-top:20px;}
+.op-card{
+  background:var(--blueprint); padding:34px 28px; position:relative; overflow:hidden;
+  min-height:230px; display:flex; flex-direction:column; justify-content:space-between;
+  transition:background .3s ease;
+}
+.op-card:hover{background:var(--blueprint-deep);}
+.op-card .op-icon{width:40px; height:40px; margin-bottom:20px;}
+.op-card h4{font-size:17px; font-weight:600; margin-bottom:10px;}
+.op-card .op-spec{
+  font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--hot-soft);
+  opacity:0; transform:translateY(6px); transition:opacity .3s ease, transform .3s ease;
+}
+.op-card:hover .op-spec{opacity:1; transform:translateY(0);}
+.op-card p.op-desc{font-size:13px; color:rgba(251,249,243,.65); line-height:1.8; margin-top:8px;}
+@media (max-width:860px){.ops-grid{grid-template-columns:1fr 1fr;}}
+@media (max-width:560px){.ops-grid{grid-template-columns:1fr;}}
+
+/* ---------------- THERMAL SIMULATOR ---------------- */
+.sim-section{background:var(--paper); padding:120px 0;}
+.sim-panel{
+  display:grid; grid-template-columns:1fr 1.15fr; gap:56px; align-items:start;
+  background:var(--white); border:1px solid var(--steel); border-radius:4px; padding:44px;
+  margin-top:10px;
+}
+@media (max-width:900px){.sim-panel{grid-template-columns:1fr;}}
+.control-block{margin-bottom:30px;}
+.control-label{
+  display:flex; justify-content:space-between; font-family:'JetBrains Mono',monospace;
+  font-size:12px; margin-bottom:10px; color:#4a453c;
+}
+.control-label .val{color:var(--hot); font-weight:600;}
+input[type=range]{
+  -webkit-appearance:none; width:100%; height:3px; background:var(--steel); border-radius:2px; outline:none;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none; width:16px; height:16px; border-radius:50%;
+  background:var(--hot); cursor:pointer; border:3px solid var(--white); box-shadow:0 0 0 1px var(--hot);
+}
+.readout-row{display:flex; gap:24px; margin-top:26px; flex-wrap:wrap;}
+.readout{
+  border:1px solid var(--steel); border-radius:4px; padding:14px 18px; flex:1; min-width:130px;
+}
+.readout .rlabel{font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.08em; color:#8a8474; margin-bottom:6px;}
+.readout .rval{font-family:'JetBrains Mono',monospace; font-size:20px; font-weight:600; color:var(--ink);}
+.readout .runit{font-size:12px; color:#8a8474; margin-left:3px;}
+
+.chart-box{position:relative;}
+.chart-box svg{width:100%; height:auto; display:block; overflow:visible;}
+.bug-grid{display:grid; grid-template-columns:repeat(10,1fr); gap:4px; margin-top:18px;}
+.bug{width:100%; aspect-ratio:1; border-radius:50%; background:var(--hot); transition:background .4s ease, opacity .4s ease;}
+.bug.dead{background:var(--steel); opacity:.35;}
+.chart-caption{font-family:'JetBrains Mono',monospace; font-size:10.5px; color:#8a8474; margin-top:10px;}
+
+/* ---------------- FLOW LAB ---------------- */
+.flow-section{background:var(--blueprint); color:var(--white); padding:120px 0 130px;}
+.flow-section .section-tag{color:var(--hot-soft);}
+.flow-section .section-head p{color:rgba(251,249,243,.72);}
+.fluid-toggle{display:flex; gap:10px; margin-bottom:36px; flex-wrap:wrap;}
+.fluid-btn{
+  font-family:'Noto Sans Thai',sans-serif; font-size:13px; letter-spacing:0;
+  background:transparent; border:1px solid rgba(255,255,255,.3); color:rgba(255,255,255,.75);
+  padding:10px 18px; border-radius:100px; cursor:pointer; transition:all .25s ease;
+}
+.fluid-btn.active{background:var(--cold); border-color:var(--cold); color:#fff;}
+.flow-panel{display:grid; grid-template-columns:1.1fr 1fr; gap:56px; align-items:center;}
+@media (max-width:900px){.flow-panel{grid-template-columns:1fr;}}
+.pipe-holder svg{width:100%; height:auto;}
+.flow-stats{display:flex; flex-direction:column; gap:20px;}
+.flow-stat .flabel{font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--cold-soft); margin-bottom:4px;}
+.flow-stat .fval{font-size:24px; font-weight:600; font-family:'Noto Sans Thai',sans-serif;}
+.flow-desc{font-size:14px; color:rgba(251,249,243,.68); line-height:1.9; margin-top:8px;}
+
+/* ---------------- WATER ACTIVITY LAB ---------------- */
+.aw-section{background:var(--paper); padding:120px 0;}
+.aw-panel{
+  background:var(--white); border:1px solid var(--steel); border-radius:4px; padding:44px;
+  margin-top:10px;
+}
+.aw-scale-wrap{margin-top:34px;}
+.aw-scale{position:relative; height:34px; border-radius:6px; overflow:hidden;
+  background:linear-gradient(90deg, #C9C2AE 0%, #C9C2AE 20%, var(--cold-soft) 20%, var(--cold-soft) 60%, var(--hot-soft) 60%, var(--hot-soft) 85%, var(--hot) 85%, var(--hot) 100%);
+}
+.aw-marker{position:absolute; top:-10px; width:3px; height:54px; background:var(--ink); transition:left .15s ease;}
+.aw-marker::after{content:''; position:absolute; top:-8px; left:50%; transform:translateX(-50%); width:14px; height:14px; border-radius:50%; background:var(--ink);}
+.aw-scale-labels{display:flex; justify-content:space-between; font-family:'JetBrains Mono',monospace; font-size:10.5px; color:#8a8474; margin-top:10px;}
+.aw-readout{display:grid; grid-template-columns:1.2fr 1fr; gap:40px; margin-top:40px; align-items:start;}
+@media (max-width:800px){.aw-readout{grid-template-columns:1fr;}}
+.aw-food-name{font-size:26px; font-weight:600; font-family:'Noto Sans Thai',sans-serif; color:var(--ink);}
+.aw-food-desc{font-size:14.5px; color:#4a453c; line-height:1.85; margin-top:10px;}
+.aw-zone-tag{
+  display:inline-block; font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.06em;
+  padding:6px 14px; border-radius:100px; margin-top:14px; color:#fff;
+}
+.aw-legend{display:flex; flex-direction:column; gap:14px;}
+.aw-legend-item{display:flex; gap:12px; align-items:flex-start; font-size:13px; color:#4a453c; line-height:1.7;}
+.aw-legend-swatch{width:14px; height:14px; border-radius:3px; flex-shrink:0; margin-top:3px;}
+
+/* ---------------- CAREERS ---------------- */
+.careers-section{background:var(--blueprint); color:var(--white); padding:120px 0 130px;}
+.careers-section .section-tag{color:var(--cold-soft);}
+.careers-section .section-head p{color:rgba(251,249,243,.72);}
+.careers-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:2px; background:rgba(255,255,255,.12); margin-top:20px;}
+@media (max-width:860px){.careers-grid{grid-template-columns:1fr 1fr;}}
+@media (max-width:560px){.careers-grid{grid-template-columns:1fr;}}
+.career-card{background:var(--blueprint-deep); padding:32px 26px; transition:background .3s ease;}
+.career-card:hover{background:#0d3a54;}
+.career-card .ctag{font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--hot-soft); letter-spacing:.08em;}
+.career-card h4{font-size:17px; font-weight:600; margin:10px 0 10px; font-family:'Noto Sans Thai',sans-serif;}
+.career-card p{font-size:13px; color:rgba(251,249,243,.68); line-height:1.8;}
+
+/* ---------------- FOOTER ---------------- */
+footer{background:var(--blueprint-deep); color:rgba(251,249,243,.55); padding:56px 0; font-family:'JetBrains Mono',monospace; font-size:11.5px;}
+footer .foot-row{display:flex; justify-content:space-between; flex-wrap:wrap; gap:14px;}
+footer a{color:rgba(251,249,243,.75);}
+
+.reveal{opacity:0; transform:translateY(24px); transition:opacity .7s ease, transform .7s ease;}
+.reveal.in{opacity:1; transform:translateY(0);}
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <a href="#top" class="display" style="font-weight:600;">FE//01</a>
+  <div class="links">
+    <a href="#venn">สาขาวิชา</a>
+    <a href="#ops">หน่วยปฏิบัติการ</a>
+    <a href="#thermal">ห้องทดลองความร้อน</a>
+    <a href="#flow">ห้องทดลองการไหล</a>
+    <a href="#aw">วอเตอร์แอคติวิตี</a>
+    <a href="#careers">สายอาชีพ</a>
+  </div>
+</nav>
+
+<section class="hero" id="top">
+  <div class="grid-bg"></div>
+  <div class="wrap hero-content">
+    <div class="eyebrow-tag"><span class="dot"></span> แผนผังกระบวนการแบบสด</div>
+    <h1>วิศวกรรม<br><em>อาหาร</em></h1>
+    <p class="lede">สาขาวิชาที่อุณหพลศาสตร์ จุลชีววิทยา และกลศาสตร์ของไหล มาบรรจบกันในการแปรรูปวัตถุดิบระดับอุตสาหกรรม ให้กลายเป็นอาหารที่ปลอดภัย คงตัว และพร้อมขึ้นชั้นวางจำหน่าย</p>
+  </div>
+  <div class="wrap pipeline-zone">
+    <svg viewBox="0 0 1100 200" id="pipelineSvg">
+      <path class="pipe-path" d="M 40 100 H 1060" />
+      <!-- nodes injected by JS -->
+    </svg>
+  </div>
+</section>
+
+<section class="venn-section" id="venn">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="section-tag">01 — สาขาวิชา</div>
+      <h2>สามศาสตร์ หนึ่งสายการผลิต</h2>
+      <p>วิศวกรรมอาหารไม่ได้เป็นของศาสตร์ใดศาสตร์หนึ่งโดยสมบูรณ์ มันยืมความเข้มงวดมาจากเคมี ยืมความระมัดระวังมาจากชีววิทยา และยืมตรรกะการขยายขนาดมาจากการออกแบบกระบวนการเชิงกล แล้วนำทั้งสามอย่างมาประยุกต์ใช้กับสิ่งที่เน่าเสียได้</p>
+    </div>
+    <div class="venn-wrap">
+      <div class="venn-svg-holder reveal">
+        <svg viewBox="0 0 420 340" width="100%">
+          <circle id="vC1" cx="170" cy="140" r="115" fill="var(--hot)" opacity="0.35"/>
+          <circle id="vC2" cx="250" cy="140" r="115" fill="var(--cold)" opacity="0.35"/>
+          <circle id="vC3" cx="210" cy="230" r="115" fill="#4A453C" opacity="0.28"/>
+          <text x="95" y="90" class="mono" font-size="12" fill="var(--ink)">เคมี</text>
+          <text x="270" y="90" class="mono" font-size="12" fill="var(--ink)">ชีววิทยา</text>
+          <text x="150" y="320" class="mono" font-size="12" fill="var(--ink)">วิศวกรรมกระบวนการ</text>
+        </svg>
+      </div>
+      <div class="venn-list reveal">
+        <div class="venn-item"><h4>เคมีอาหาร</h4><p>ปฏิกิริยาเมลลาร์ด การเสียสภาพของโปรตีน การเกิดออกซิเดชันของไขมัน — ปฏิกิริยาที่กำหนดรสชาติ สี และการคงอยู่ของสารอาหารตลอดกระบวนการแปรรูป</p></div>
+        <div class="venn-item"><h4>จุลชีววิทยา</h4><p>การสร้างแบบจำลองอัตราการตายของเชื้อก่อโรคและจุลินทรีย์ที่ทำให้เสีย เพื่อกำหนดเป้าหมายการฆ่าเชื้อด้วยความร้อนหรือการถนอมอาหารที่ปลอดภัยและทำลายคุณภาพน้อยที่สุด</p></div>
+        <div class="venn-item"><h4>วิศวกรรมกระบวนการ</h4><p>สมการการถ่ายเทความร้อน การไหลของของไหล และการถ่ายเทมวลสาร ที่ขยายขนาดจากบีกเกอร์ในห้องแล็บไปสู่สายการผลิตขนาด 20,000 ลิตร</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="ops-section" id="ops">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="section-tag">02 — หน่วยปฏิบัติการ</div>
+      <h2>หกกระบวนการ ทุกสายผลิตภัณฑ์</h2>
+      <p>อาหารบรรจุภัณฑ์เกือบทุกชนิดต้องผ่านการรวมกันบางส่วนของหกขั้นตอนเชิงวิศวกรรมนี้ ระหว่างวัตถุดิบดิบจนถึงชั้นวางจำหน่าย</p>
+    </div>
+    <div class="ops-grid" id="opsGrid"></div>
+  </div>
+</section>
+
+<section class="sim-section" id="thermal">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="section-tag">03 — ห้องทดลองการแปรรูปด้วยความร้อน</div>
+      <h2>ปรับเส้นโค้งการฆ่าเชื้อด้วยตัวเอง</h2>
+      <p>ทุกกระบวนการให้ความร้อนคือการแลกเปลี่ยนกับเวลา: ยิ่งร้อนมากยิ่งฆ่าเชื้อโรคได้เร็ว แต่ก็ทำลายคุณภาพเร็วขึ้นเช่นกัน ลองปรับอุณหภูมิและเวลาคงอุณหภูมิเพื่อดูการลดจำนวนจุลินทรีย์แบบเรียลไทม์ จำลองจากเส้นโค้งการตายเชิงความร้อนแบบค่า D / ค่า z</p>
+    </div>
+    <div class="sim-panel reveal">
+      <div>
+        <div class="control-block">
+          <div class="control-label"><span>อุณหภูมิกระบวนการ</span><span class="val" id="tempVal">121.0 °C</span></div>
+          <input type="range" id="tempSlider" min="90" max="135" step="0.5" value="121">
+        </div>
+        <div class="control-block">
+          <div class="control-label"><span>เวลาคงอุณหภูมิ</span><span class="val" id="timeVal">3.0 min</span></div>
+          <input type="range" id="timeSlider" min="0" max="15" step="0.1" value="3">
+        </div>
+        <div class="readout-row">
+          <div class="readout"><div class="rlabel">ค่า D ที่อุณหภูมินี้</div><div class="rval" id="dval">0.20</div><span class="runit">min</span></div>
+          <div class="readout"><div class="rlabel">การลดลอการิทึม</div><div class="rval" id="logred">15.0</div><span class="runit">log₁₀</span></div>
+          <div class="readout"><div class="rlabel">จำนวนรอดชีวิต</div><div class="rval" id="survivors">&lt;1</div><span class="runit">/ 10⁶</span></div>
+        </div>
+      </div>
+      <div class="chart-box">
+        <svg viewBox="0 0 480 200" id="curveSvg">
+          <line x1="40" y1="10" x2="40" y2="170" stroke="#B9C2C8" stroke-width="1"/>
+          <line x1="40" y1="170" x2="470" y2="170" stroke="#B9C2C8" stroke-width="1"/>
+          <text x="0" y="14" class="mono" font-size="9" fill="#8a8474">10⁶</text>
+          <text x="0" y="175" class="mono" font-size="9" fill="#8a8474">10⁰</text>
+          <path id="survCurve" fill="none" stroke="#D9773F" stroke-width="2.5"/>
+        </svg>
+        <div class="chart-caption">จำนวนประชากรที่รอดชีวิต เทียบกับเวลา — กราฟกึ่งลอการิทึมที่อุณหภูมิที่กำหนด</div>
+        <div class="bug-grid" id="bugGrid"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="flow-section" id="flow">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="section-tag">04 — ห้องทดลองพฤติกรรมการไหล</div>
+      <h2>อาหารไม่ได้ไหลเหมือนน้ำทุกชนิด</h2>
+      <p>ซอสมะเขือเทศ แป้งเปียก และนม ต่างต้านทานการไหลไม่เหมือนกัน ลองสลับชนิดของไหลเพื่อดูว่าความหนืดของแต่ละชนิดเปลี่ยนรูปแบบการไหลตัดขวางท่ออย่างไร</p>
+    </div>
+    <div class="fluid-toggle reveal" id="fluidToggle">
+      <button class="fluid-btn active" data-n="1">นิวโทเนียน — นม</button>
+      <button class="fluid-btn" data-n="3.2">หนืดลดตามแรงเฉือน — ซอสมะเขือเทศ</button>
+      <button class="fluid-btn" data-n="0.55">หนืดเพิ่มตามแรงเฉือน — แป้งเปียก</button>
+    </div>
+    <div class="flow-panel reveal">
+      <div class="pipe-holder">
+        <svg viewBox="0 0 420 220" id="pipeSvg">
+          <rect x="20" y="20" width="380" height="180" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="2" rx="6"/>
+          <path id="profileFill" fill="var(--cold)" opacity="0.35"/>
+          <path id="profileLine" fill="none" stroke="var(--cold-soft)" stroke-width="2"/>
+          <g id="flowDots"></g>
+        </svg>
+      </div>
+      <div class="flow-stats">
+        <div class="flow-stat"><div class="flabel">รูปแบบการไหล</div><div class="fval" id="profileName">พาราโบลา (การไหลแบบราบเรียบ)</div></div>
+        <div class="flow-stat"><div class="flabel">อัตราส่วนความเร็วกึ่งกลาง / ผนังท่อ</div><div class="fval" id="ratioVal">2.0×</div></div>
+        <p class="flow-desc" id="flowDesc">ของไหลแบบนิวโทเนียนอย่างนมถูกเฉือนอย่างสม่ำเสมอ — ความเร็วสูงสุดอยู่ที่กึ่งกลางท่อและลดลงเป็นศูนย์ที่ผนังท่อเป็นรูปพาราโบลาเรียบ นี่คือรูปแบบการไหลแบบราบเรียบตามตำราที่สมการถ่ายเทความร้อนส่วนใหญ่ใช้เป็นสมมติฐาน</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="aw-section" id="aw">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="section-tag">05 — วอเตอร์แอคติวิตีและอายุการเก็บรักษา</div>
+      <h2>น้ำที่จุลินทรีย์เข้าถึงได้ ตัวกำหนดอายุอาหาร</h2>
+      <p>วอเตอร์แอคติวิตี (a<sub>w</sub>) คือปริมาณ "น้ำอิสระ" ในอาหารที่จุลินทรีย์สามารถนำไปใช้เจริญเติบโตได้ ไม่ใช่ปริมาณน้ำทั้งหมด — อาหารสองชนิดที่มีความชื้นเท่ากันอาจมีค่า a<sub>w</sub> ต่างกันมาก ลองเลื่อนแถบด้านล่างเพื่อดูว่าอาหารแต่ละชนิดอยู่ในโซนความเสี่ยงใด</p>
+    </div>
+    <div class="aw-panel reveal">
+      <div class="control-block" style="margin-bottom:0;">
+        <div class="control-label"><span>ค่าวอเตอร์แอคติวิตี (a<sub>w</sub>)</span><span class="val" id="awVal">0.99</span></div>
+        <input type="range" id="awSlider" min="0.10" max="0.99" step="0.01" value="0.99">
+      </div>
+      <div class="aw-scale-wrap">
+        <div class="aw-scale"><div class="aw-marker" id="awMarker" style="left:99%;"></div></div>
+        <div class="aw-scale-labels"><span>0.10</span><span>0.60</span><span>0.85</span><span>0.99</span></div>
+      </div>
+      <div class="aw-readout">
+        <div>
+          <div class="aw-food-name" id="awFoodName">เนื้อสดและผลไม้สด</div>
+          <p class="aw-food-desc" id="awFoodDesc">น้ำอิสระสูงมาก เอื้อต่อการเจริญของแบคทีเรียก่อโรคแทบทุกชนิด ต้องอาศัยความเย็นหรือการแปรรูปทันทีเพื่อความปลอดภัย</p>
+          <span class="aw-zone-tag" id="awZoneTag" style="background:var(--hot);">ความเสี่ยงสูง — แบคทีเรียเจริญได้</span>
+        </div>
+        <div class="aw-legend">
+          <div class="aw-legend-item"><div class="aw-legend-swatch" style="background:#C9C2AE;"></div><span>a<sub>w</sub> &lt; 0.60 — เสถียรทางจุลชีววิทยา จุลินทรีย์ส่วนใหญ่เจริญไม่ได้ (เช่น พาสต้าแห้ง นมผง)</span></div>
+          <div class="aw-legend-item"><div class="aw-legend-swatch" style="background:var(--cold-soft);"></div><span>a<sub>w</sub> 0.60–0.85 — ยีสต์และราบางชนิดเจริญได้ ต้องควบคุมร่วมกับปัจจัยอื่น (เช่น แยม ผลไม้แห้ง น้ำผึ้ง)</span></div>
+          <div class="aw-legend-item"><div class="aw-legend-swatch" style="background:var(--hot-soft);"></div><span>a<sub>w</sub> 0.85–0.99 — แบคทีเรียก่อโรคหลายชนิดเจริญได้ ต้องใช้ความเย็นหรือการฆ่าเชื้อ (เช่น ขนมปัง ชีส)</span></div>
+          <div class="aw-legend-item"><div class="aw-legend-swatch" style="background:var(--hot);"></div><span>a<sub>w</sub> &gt; 0.99 — น้ำอิสระใกล้เคียงน้ำบริสุทธิ์ ความเสี่ยงสูงสุด (เช่น เนื้อสด ผลไม้สด นมสด)</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="careers-section" id="careers">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="section-tag">06 — เส้นทางอาชีพ</div>
+      <h2>จากห้องแล็บ สู่สายการผลิตระดับอุตสาหกรรม</h2>
+      <p>ผู้ที่จบสายวิศวกรรมอาหารหรือสาขาที่เกี่ยวข้อง สามารถทำงานได้หลากหลายตำแหน่งตลอดห่วงโซ่การผลิตอาหาร ตั้งแต่การวิจัยพัฒนาไปจนถึงการบริหารโรงงาน</p>
+    </div>
+    <div class="careers-grid" id="careersGrid"></div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot-row">
+    <span>วิศวกรรมอาหาร — ความรู้พื้นฐานกระบวนการ</span>
+    <span>นายปรเมศวร์ เสือเมือง</span>
+  </div>
+</footer>
+
+<script>
+/* ---------- reveal on scroll ---------- */
+const revealEls = document.querySelectorAll('.reveal');
+const io = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('in'); });
+},{threshold:.15});
+revealEls.forEach(el=> io.observe(el));
+
+/* ---------- HERO PIPELINE ---------- */
+const stages = [
+  {x:110, label:"รับวัตถุดิบ", spec:"QA · 4°C"},
+  {x:320, label:"ล้าง/คัดแยก", spec:"H₂O · 2 bar"},
+  {x:530, label:"กระบวนการความร้อน", spec:"121°C · 3 min"},
+  {x:740, label:"บรรจุภัณฑ์", spec:"MAP · N₂/CO₂"},
+  {x:950, label:"ห่วงโซ่ความเย็น", spec:"−18°C"},
+];
+const svgNS = "http://www.w3.org/2000/svg";
+const pipelineSvg = document.getElementById('pipelineSvg');
+stages.forEach(s=>{
+  const node = document.createElementNS(svgNS,'circle');
+  node.setAttribute('cx', s.x); node.setAttribute('cy', 100); node.setAttribute('r', 22);
+  node.setAttribute('class','stage-node');
+  pipelineSvg.appendChild(node);
+
+  const label = document.createElementNS(svgNS,'text');
+  label.setAttribute('x', s.x); label.setAttribute('y', 145);
+  label.setAttribute('text-anchor','middle'); label.setAttribute('class','stage-label');
+  label.textContent = s.label;
+  pipelineSvg.appendChild(label);
+
+  const spec = document.createElementNS(svgNS,'text');
+  spec.setAttribute('x', s.x); spec.setAttribute('y', 162);
+  spec.setAttribute('text-anchor','middle'); spec.setAttribute('class','stage-spec');
+  spec.textContent = s.spec;
+  pipelineSvg.appendChild(spec);
+});
+// flowing dots
+for(let i=0;i<4;i++){
+  const dot = document.createElementNS(svgNS,'circle');
+  dot.setAttribute('r', 5); dot.setAttribute('cy', 100); dot.setAttribute('class','flow-dot');
+  pipelineSvg.appendChild(dot);
+  let t = i * 0.25;
+  function animateDot(){
+    t += 0.0028;
+    if(t>1) t=0;
+    const x = 40 + t*1020;
+    dot.setAttribute('cx', x);
+    requestAnimationFrame(animateDot);
+  }
+  animateDot();
+}
+
+/* ---------- VENN hover ---------- */
+document.querySelectorAll('.venn-item').forEach(item=>{
+  item.addEventListener('mouseenter', ()=> item.classList.add('active'));
+  item.addEventListener('mouseleave', ()=> item.classList.remove('active'));
+});
+
+/* ---------- UNIT OPS GRID ---------- */
+const ops = [
+  {name:"การแปรรูปด้วยความร้อน", desc:"การพาสเจอไรซ์และการฆ่าเชื้อด้วยไอน้ำหรือน้ำร้อน เพื่อทำลายเชื้อก่อโรค", spec:"D₁₂₁ = 0.2 min"},
+  {name:"การอัดพอง (เอ็กซ์ทรูชัน)", desc:"แรงเฉือน ความร้อน และความดันสูง เปลี่ยนสารละลายแป้งให้เป็นรูปทรงคงตัวบนชั้นวาง", spec:"180°C · 30 bar"},
+  {name:"การทำแห้ง", desc:"การกำจัดน้ำอิสระให้ต่ำกว่าระดับที่จุลินทรีย์ต้องการในการเจริญเติบโต", spec:"aw < 0.6"},
+  {name:"การแยกและการกรอง", desc:"การปั่นเหวี่ยงและการกรองผ่านเมมเบรน แยกองค์ประกอบตามขนาดหรือความหนาแน่น", spec:"0.2 µm cutoff"},
+  {name:"การบรรจุภัณฑ์", desc:"บรรจุภัณฑ์ปรับบรรยากาศและบรรจุแบบปลอดเชื้อ ช่วยยืดอายุการเก็บรักษาโดยไม่ต้องใช้สารกันเสีย", spec:"O₂ < 0.5%"},
+  {name:"ห่วงโซ่ความเย็น", desc:"การแช่เย็นอย่างต่อเนื่องตั้งแต่โรงงานแปรรูปจนถึงชั้นวางในร้านค้าปลีก", spec:"−18°C ± 2"},
+];
+const opsGrid = document.getElementById('opsGrid');
+ops.forEach(o=>{
+  const card = document.createElement('div');
+  card.className = 'op-card';
+  card.innerHTML = `
+    <div>
+      <svg class="op-icon" viewBox="0 0 40 40"><circle cx="20" cy="20" r="17" fill="none" stroke="var(--hot-soft)" stroke-width="1.5"/><circle cx="20" cy="20" r="4" fill="var(--hot-soft)"/></svg>
+      <h4>${o.name}</h4>
+      <p class="op-desc">${o.desc}</p>
+    </div>
+    <div class="op-spec mono">${o.spec}</div>
+  `;
+  opsGrid.appendChild(card);
+});
+
+/* ---------- THERMAL SIMULATOR ---------- */
+const tempSlider = document.getElementById('tempSlider');
+const timeSlider = document.getElementById('timeSlider');
+const tempVal = document.getElementById('tempVal');
+const timeVal = document.getElementById('timeVal');
+const dvalEl = document.getElementById('dval');
+const logredEl = document.getElementById('logred');
+const survivorsEl = document.getElementById('survivors');
+const survCurve = document.getElementById('survCurve');
+const bugGrid = document.getElementById('bugGrid');
+
+for(let i=0;i<100;i++){
+  const b = document.createElement('div');
+  b.className='bug'; bugGrid.appendChild(b);
+}
+const bugs = document.querySelectorAll('.bug');
+
+const D0 = 0.2; // min, D-value at 121C (reference pathogen)
+const z = 10; // C, z-value
+const N0 = 1e6;
+
+function updateThermal(){
+  const T = parseFloat(tempSlider.value);
+  const time = parseFloat(timeSlider.value);
+  const D = D0 * Math.pow(10, (121 - T)/z);
+  const logReduction = time / D;
+  const survivorsFrac = Math.pow(10, -logReduction);
+  const survivorsCount = N0 * survivorsFrac;
+
+  tempVal.textContent = T.toFixed(1) + " °C";
+  timeVal.textContent = time.toFixed(1) + " min";
+  dvalEl.textContent = D < 0.01 ? D.toExponential(1) : D.toFixed(2);
+  logredEl.textContent = logReduction.toFixed(1);
+  survivorsEl.textContent = survivorsCount < 1 ? "<1" : Math.round(survivorsCount).toLocaleString();
+
+  const maxT = Math.max(time*1.25, 2);
+  let d = "";
+  const W=430, H=160, X0=40, Y0=170, Y1=10;
+  for(let i=0;i<=60;i++){
+    const t = (i/60)*maxT;
+    const frac = Math.pow(10, -t/D);
+    const logN = Math.log10(Math.max(frac*N0,0.01));
+    const yNorm = logN/6;
+    const y = Y1 + (1-Math.min(Math.max(yNorm,0),1))*(Y0-Y1);
+    const x = X0 + (t/maxT)*W;
+    d += (i===0? "M":"L") + x.toFixed(1) + " " + y.toFixed(1) + " ";
+  }
+  survCurve.setAttribute('d', d);
+
+  const killFraction = Math.min(logReduction/6, 1);
+  const deadCount = Math.round(killFraction*100);
+  bugs.forEach((b,i)=>{
+    b.classList.toggle('dead', i < deadCount);
+  });
+}
+tempSlider.addEventListener('input', updateThermal);
+timeSlider.addEventListener('input', updateThermal);
+updateThermal();
+
+/* ---------- FLOW LAB ---------- */
+const fluidBtns = document.querySelectorAll('.fluid-btn');
+const profileFill = document.getElementById('profileFill');
+const profileLine = document.getElementById('profileLine');
+const profileName = document.getElementById('profileName');
+const ratioVal = document.getElementById('ratioVal');
+const flowDesc = document.getElementById('flowDesc');
+const flowDots = document.getElementById('flowDots');
+
+const fluidInfo = {
+  "1": {name:"พาราโบลา (การไหลแบบราบเรียบ)", ratio:"2.0×", desc:"ของไหลแบบนิวโทเนียนอย่างนมถูกเฉือนอย่างสม่ำเสมอ — ความเร็วสูงสุดอยู่ที่กึ่งกลางท่อและลดลงเป็นศูนย์ที่ผนังท่อเป็นรูปพาราโบลาเรียบ นี่คือรูปแบบการไหลแบบราบเรียบตามตำราที่สมการถ่ายเทความร้อนส่วนใหญ่ใช้เป็นสมมติฐาน"},
+  "3.2": {name:"แบนคล้ายลิ่มเสมือน", ratio:"1.3×", desc:"ของไหลชนิดหนืดลดตามแรงเฉือนอย่างซอสมะเขือเทศ จะมีความหนืดลดลงเมื่อถูกเฉือนเร็วขึ้นใกล้ผนังท่อ ทำให้รูปแบบความเร็วแบนราบเกือบเป็นการไหลแบบลิ่ม — ของไหลส่วนใหญ่เคลื่อนที่ด้วยความเร็วใกล้เคียงกัน"},
+  "0.55": {name:"ยอดแหลมคม", ratio:"3.1×", desc:"ของไหลชนิดหนืดเพิ่มตามแรงเฉือนอย่างแป้งเปียกเข้มข้น จะแข็งตัวขึ้นเมื่อถูกเฉือนใกล้ผนังท่อ บังคับให้การไหลกระจุกตัวเข้าสู่แนวกึ่งกลางอย่างชัดเจน"},
+};
+
+function drawProfile(n){
+  const R=90, cx=210, cyTop=30, cyBot=210, steps=40;
+  let top = [], bottom = [];
+  for(let i=0;i<=steps;i++){
+    const yFrac = i/steps;
+    const v = (1 - Math.pow(yFrac, n));
+    const vx = 60*v;
+    top.push([cx - vx, 20 + yFrac*90]);
+  }
+  for(let i=steps;i>=0;i--){
+    const yFrac = i/steps;
+    const v = (1 - Math.pow(yFrac, n));
+    const vx = 60*v;
+    bottom.push([cx - vx, 110 + (1-yFrac)*90]);
+  }
+  const pts = [...top, ...bottom];
+  let d = "M " + pts.map(p=>p[0].toFixed(1)+" "+p[1].toFixed(1)).join(" L ") + " Z";
+  profileFill.setAttribute('d', d);
+
+  let ld = "M " + top.map(p=>p[0].toFixed(1)+" "+p[1].toFixed(1)).join(" L ");
+  profileLine.setAttribute('d', ld);
+
+  return n;
+}
+
+let currentN = 1;
+function setFluid(n){
+  currentN = n;
+  drawProfile(n);
+  const info = fluidInfo[String(n)];
+  profileName.textContent = info.name;
+  ratioVal.textContent = info.ratio;
+  flowDesc.textContent = info.desc;
+}
+fluidBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    fluidBtns.forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    setFluid(parseFloat(btn.dataset.n));
+  });
+});
+setFluid(1);
+
+// animated flow dots
+const dotRadii = [0, 0.35, 0.65];
+const flowDotEls = dotRadii.map((r,i)=>{
+  const el = document.createElementNS(svgNS,'circle');
+  el.setAttribute('r', 4); el.setAttribute('fill', '#F0B489');
+  flowDots.appendChild(el);
+  return {el, r, x: 40 + i*10};
+});
+flowDotEls[0].el.setAttribute('cy', 110);
+flowDotEls[1].el.setAttribute('cy', 110-55);
+flowDotEls[2].el.setAttribute('cy', 110-85);
+function animateFlow2(){
+  flowDotEls.forEach((d,i)=>{
+    const v = (1 - Math.pow(d.r, currentN));
+    const speed = 0.5 + v*2.4;
+    d.x += speed;
+    if(d.x>390) d.x = 30;
+    d.el.setAttribute('cx', d.x);
+  });
+  requestAnimationFrame(animateFlow2);
+}
+animateFlow2();
+
+/* ---------- WATER ACTIVITY LAB ---------- */
+const awSlider = document.getElementById('awSlider');
+const awVal = document.getElementById('awVal');
+const awMarker = document.getElementById('awMarker');
+const awFoodName = document.getElementById('awFoodName');
+const awFoodDesc = document.getElementById('awFoodDesc');
+const awZoneTag = document.getElementById('awZoneTag');
+
+const awFoods = [
+  {max:0.99, name:"เนื้อสดและผลไม้สด", desc:"น้ำอิสระสูงมาก เอื้อต่อการเจริญของแบคทีเรียก่อโรคแทบทุกชนิด ต้องอาศัยความเย็นหรือการแปรรูปทันทีเพื่อความปลอดภัย", zone:"ความเสี่ยงสูง — แบคทีเรียเจริญได้", color:"var(--hot)"},
+  {max:0.96, name:"ชีสสด นมสด", desc:"ยังคงเอื้อต่อแบคทีเรียก่อโรคหลายชนิด จำเป็นต้องใช้ความเย็นตลอดห่วงโซ่การกระจายสินค้า", zone:"ความเสี่ยงสูง — แบคทีเรียเจริญได้", color:"var(--hot)"},
+  {max:0.90, name:"ขนมปัง เนื้อรมควัน", desc:"เชื้อก่อโรคบางชนิดยังเจริญได้ แต่ช้าลง มักอาศัยสารกันเสียหรือบรรจุภัณฑ์ปรับบรรยากาศร่วมด้วย", zone:"ความเสี่ยงปานกลางถึงสูง", color:"var(--hot-soft)"},
+  {max:0.85, name:"แฮมหมัก ซาลามี่", desc:"อยู่ที่ขอบเขตความปลอดภัยตามมาตรฐานสากล ต่ำกว่าระดับนี้แบคทีเรียก่อโรคส่วนใหญ่จะไม่เจริญเติบโต", zone:"ขอบเขตความปลอดภัยของแบคทีเรีย", color:"var(--hot-soft)"},
+  {max:0.75, name:"แยมผลไม้ กวน", desc:"แบคทีเรียก่อโรคเจริญไม่ได้แล้ว แต่ยีสต์และราบางสายพันธุ์ยังเจริญได้ถ้าเก็บไม่ดี", zone:"ยีสต์และราเจริญได้", color:"var(--cold-soft)"},
+  {max:0.60, name:"ผลไม้แห้ง น้ำผึ้ง", desc:"ใกล้ขอบเขตล่างของการเจริญเติบโตของจุลินทรีย์ ราที่ทนน้ำอิสระต่ำบางชนิดยังอยู่รอดได้", zone:"ขอบเขตล่าง — เกือบเสถียร", color:"var(--cold-soft)"},
+  {max:0.30, name:"บิสกิต แครกเกอร์", desc:"ต่ำกว่าระดับที่จุลินทรีย์ต้องการในการเจริญเติบโตอย่างชัดเจน อายุการเก็บรักษายาวนานหากป้องกันความชื้นจากภายนอกได้ดี", zone:"เสถียรทางจุลชีววิทยา", color:"#C9C2AE"},
+  {max:0.10, name:"พาสต้าแห้ง นมผง", desc:"น้ำอิสระต่ำมาก จุลินทรีย์แทบทั้งหมดไม่สามารถเจริญเติบโตได้ อายุการเก็บรักษาขึ้นกับปฏิกิริยาเคมี ไม่ใช่จุลินทรีย์อีกต่อไป", zone:"เสถียรทางจุลชีววิทยา", color:"#C9C2AE"},
+];
+
+function updateAw(){
+  const v = parseFloat(awSlider.value);
+  awVal.textContent = v.toFixed(2);
+  const pct = ((v - 0.10) / (0.99 - 0.10)) * 100;
+  awMarker.style.left = pct + "%";
+
+  let match = awFoods[0];
+  for(let i=awFoods.length-1;i>=0;i--){
+    if(v <= awFoods[i].max) match = awFoods[i];
+  }
+  awFoodName.textContent = match.name;
+  awFoodDesc.textContent = match.desc;
+  awZoneTag.textContent = match.zone;
+  awZoneTag.style.background = match.color;
+}
+awSlider.addEventListener('input', updateAw);
+updateAw();
+
+/* ---------- CAREERS GRID ---------- */
+const careers = [
+  {tag:"R&D", name:"นักวิจัยและพัฒนาผลิตภัณฑ์", desc:"คิดค้นสูตรและกระบวนการผลิตอาหารใหม่ ตั้งแต่ต้นแบบในห้องแล็บจนถึงการผลิตจริง"},
+  {tag:"PROCESS", name:"วิศวกรกระบวนการผลิต", desc:"ออกแบบและปรับปรุงสายการผลิตให้มีประสิทธิภาพ ปลอดภัย และได้มาตรฐาน"},
+  {tag:"QA / QC", name:"ฝ่ายประกันและควบคุมคุณภาพ", desc:"ตรวจสอบวัตถุดิบและผลิตภัณฑ์ให้เป็นไปตามมาตรฐานความปลอดภัยอาหารตลอดกระบวนการ"},
+  {tag:"PACKAGING", name:"วิศวกรบรรจุภัณฑ์", desc:"เลือกและออกแบบบรรจุภัณฑ์ที่ยืดอายุการเก็บรักษาและปกป้องคุณภาพผลิตภัณฑ์"},
+  {tag:"PLANT OPS", name:"ผู้จัดการโรงงานผลิต", desc:"บริหารจัดการสายการผลิต กำลังคน และทรัพยากรให้เป็นไปตามเป้าหมายการผลิต"},
+  {tag:"REGULATORY", name:"ฝ่ายกฎระเบียบและมาตรฐาน", desc:"ดูแลให้ผลิตภัณฑ์เป็นไปตามข้อกำหนดของหน่วยงานกำกับดูแลทั้งในและต่างประเทศ"},
+];
+const careersGrid = document.getElementById('careersGrid');
+careers.forEach(c=>{
+  const card = document.createElement('div');
+  card.className = 'career-card';
+  card.innerHTML = `
+    <div class="ctag mono">${c.tag}</div>
+    <h4>${c.name}</h4>
+    <p>${c.desc}</p>
+  `;
+  careersGrid.appendChild(card);
+});
+</script>
+</body>
+</html>
